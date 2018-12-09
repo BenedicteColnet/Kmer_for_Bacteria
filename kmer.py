@@ -33,12 +33,12 @@ def read_genome(fileName):
 
 
 
-def k_mer_naive(genom,k):
+def k_mer_naive_with_dict_initialization(genom,k):
             
     """
     ENTRY genom sequence (str) and size of kmer asked (int)
     
-    FUNCTION read the genom and count the number of kmer
+    FUNCTION read the genom and count the number of kmer with dictionary init
     
     EXIT dictionnary ({kmer:number})
     
@@ -55,6 +55,29 @@ def k_mer_naive(genom,k):
         result[genom[i:i+k]]+=1
 
     return result
+
+
+def k_mer_naive_without_dict_initialization(genom,k):
+            
+    """
+    ENTRY genom sequence (str) and size of kmer asked (int)
+    
+    FUNCTION read the genom and count the number of kmer without  dictionary init
+    
+    EXIT dictionnary ({kmer:number})
+    
+    """    
+    genomLength = len(genom)
+    result = {}
+    for i in range(genomLength-k+1):
+        kmer=genom[i:i+k]
+        if kmer in result:
+            result[kmer]+=1
+        else:
+            result[kmer]=1
+
+    return result
+
 
 
 
@@ -75,8 +98,16 @@ def list_of_possible_kmer(letters,k):
 
 query='GCF_002973605.1_ASM297360v1_genomic.fna'    
 start = time.time()       
-result = k_mer_naive(read_genome(query),3)
+result = k_mer_naive_with_dict_initialization(read_genome(query),3)
 end = time.time()
+with_dic_initialization=end-start
+
+start = time.time()       
+result = k_mer_naive_without_dict_initialization(read_genome(query),3)
+end = time.time()
+without_dic_initialization=end-start
+
+
 
 plt.figure()
 plt.bar(result.keys(), result.values(), color='g')
