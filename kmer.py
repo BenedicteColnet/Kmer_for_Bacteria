@@ -98,17 +98,22 @@ def list_of_possible_kmer(letters,k):
 
 query='GCF_002973605.1_ASM297360v1_genomic.fna'    
 start = time.time()       
-result = k_mer_naive_with_dict_initialization(read_genome(query),3)
+result_with = k_mer_naive_with_dict_initialization(read_genome(query),3)
 end = time.time()
 with_dic_initialization=end-start
 
 start = time.time()       
-result = k_mer_naive_without_dict_initialization(read_genome(query),3)
+result_without = k_mer_naive_without_dict_initialization(read_genome(query),3)
 end = time.time()
 without_dic_initialization=end-start
 
 
 
 plt.figure()
-plt.bar(result.keys(), result.values(), color='g')
+plt.bar(result_with.keys(), result_with.values(), color='g')
+plt.plot()
+
+
+plt.figure()
+plt.bar(result_without.keys(), result_without.values(), color='g')
 plt.plot()
