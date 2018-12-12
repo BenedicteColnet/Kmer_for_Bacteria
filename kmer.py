@@ -8,6 +8,7 @@ Created on Wed Dec  5 17:18:49 2018
 from itertools import *
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import time
 
 def read_genome(fileName):
@@ -33,7 +34,7 @@ def read_genome(fileName):
 
 
 
-def k_mer_naive_with_dict_initialization(genom,k):
+def k_mer_naive_with_dict_initialization(genome,k):
             
     """
     ENTRY genom sequence (str) and size of kmer asked (int)
@@ -43,7 +44,7 @@ def k_mer_naive_with_dict_initialization(genom,k):
     EXIT dictionnary ({kmer:number})
     
     """    
-    genomLength = len(genom)
+    genomLength = len(genome)
     result = {}
     words=list_of_possible_kmer('ATGC',k)
     for wo in words:
@@ -52,12 +53,12 @@ def k_mer_naive_with_dict_initialization(genom,k):
             w += wo[i]
         result[w] = 0
     for i in range(genomLength-k+1):
-        result[genom[i:i+k]]+=1
+        result[genome[i:i+k]]+=1
 
     return result
 
 
-def k_mer_naive_without_dict_initialization(genom,k):
+def k_mer_naive_without_dict_initialization(genome,k):
             
     """
     ENTRY genom sequence (str) and size of kmer asked (int)
@@ -67,19 +68,16 @@ def k_mer_naive_without_dict_initialization(genom,k):
     EXIT dictionnary ({kmer:number})
     
     """    
-    genomLength = len(genom)
+    genomLength = len(genome)
     result = {}
     for i in range(genomLength-k+1):
-        kmer=genom[i:i+k]
+        kmer=genome[i:i+k]
         if kmer in result:
             result[kmer]+=1
         else:
             result[kmer]=1
 
     return result
-
-
-
 
 def list_of_possible_kmer(letters,k):
     
@@ -97,23 +95,98 @@ def list_of_possible_kmer(letters,k):
 
 
 query='GCF_002973605.1_ASM297360v1_genomic.fna'    
-start = time.time()       
-result_with = k_mer_naive_with_dict_initialization(read_genome(query),3)
-end = time.time()
-with_dic_initialization=end-start
-
-start = time.time()       
-result_without = k_mer_naive_without_dict_initialization(read_genome(query),3)
-end = time.time()
-without_dic_initialization=end-start
 
 
+def naive_time_xperiment():
+    with_dic_initialization = []
+    for k in range(1,14):
+        print("Processing with_dict_init, k=",str(k))
+        start = time.time()       
+        result_with = k_mer_naive_with_dict_initialization(read_genome(query),k)
+        end = time.time()
+        with_dic_initialization.append(end-start)
+
+    without_dic_initialization = []
+    for k in range(1,14):
+        print("Processing without_dict_init, k=",str(k))
+        start = time.time()       
+        result_without = k_mer_naive_without_dict_initialization(read_genome(query),k)
+        end = time.time()
+        without_dic_initialization.append(end-start)
+
+    np.save('with_dic_initialization',with_dic_initialization)
+    np.save('without_dic_initialization',without_dic_initialization)
+
+    plt.plot(with_dic_initialization, color = 'r', label='With dictionary initialization')
+    plt.plot(without_dic_initialization, color = 'b', label='Without dictionary initialization')
+    plt.legend(loc='best')
+    plt.show()
+
+def dict_to_normalized_vector(dict):
+    vec = np.array(list(dict.values()))
+    return vec / sum(vec)
+
+def homogenity_matrix(genome,nDiv,k):
+    seqSections = []
+    seqSignature = []
+    gLen = len(genome)
+    l = int(np.round(gLen / nDiv))
+    disMat = np.zeros((nDiv,nDiv))
+    for i in range(nDiv):
+        if((i+1)*l > gLen):
+            break
+        seqSections.append(genome[i*l:(i+1)*l])
+    for sec in seqSections:
+        sig = k_mer_naive_with_dict_initialization(sec,k)
+        seqSignature.append(dict_to_normalized_vector(sig))
+    
+    for i,sigi in enumerate(seqSignature):
+        for j,sigj in enumerate(seqSignature):
+            disMat[i][j] = np.linalg.norm(sigi-sigj)
+    
+    fig, ax = plt.subplots()
+    cax = ax.imshow(disMat, interpolation='nearest', cmap=cm.coolwarm)
+    ax.set_title('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+    cbar = fig.colorbar(cax, ticks=[0, 0, np.max(disMat)])
+    plt.show()
+
+    return disMat
+
+#comparing with global
+def homogenity_vector(genome,devLen,k):
+    disVector = []
+    gLen = len(genome)
+    globalSig = dict_to_normalized_vector(k_mer_naive_with_dict_initialization(genome,k))
+    for i in range(gLen-devLen+1):
+        print(i)
+        sec = genome[i:i+devLen]
+        secSig = dict_to_normalized_vector(k_mer_naive_with_dict_initialization(sec,k))
+        disVector.append(np.linalg.norm(globalSig-secSig))
+    
+    fig, ax = plt.subplots()
+    ax.plot(disVector)
+    ax.set_title('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+    ax.set_ylabel('Distance')
+    ax.set_xlabel('Position')
+    plt.show()
+
+    return disVector
+
+
+
+#distMat = homogenity_matrix(read_genome(query),1000,3)
+homogenity_vector(read_genome(query),1000,3)
+
+"""
+plt.matshow(distMat, cmap=plt.cm.Blues)
+plt.colorbar()
+plt.show()
 
 plt.figure()
 plt.bar(result_with.keys(), result_with.values(), color='g')
 plt.plot()
 
-
 plt.figure()
 plt.bar(result_without.keys(), result_without.values(), color='g')
 plt.plot()
+"""
