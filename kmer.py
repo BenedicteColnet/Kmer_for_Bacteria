@@ -143,39 +143,46 @@ def homogenity_matrix(genome,nDiv,k):
     for i,sigi in enumerate(seqSignature):
         for j,sigj in enumerate(seqSignature):
             disMat[i][j] = np.linalg.norm(sigi-sigj)
-    
-    fig, ax = plt.subplots()
-    cax = ax.imshow(disMat, interpolation='nearest', cmap=cm.coolwarm)
-    ax.set_title('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
-    cbar = fig.colorbar(cax, ticks=[0, 0, np.max(disMat)])
-    plt.show()
-
     return disMat
 
 #comparing with global
-def homogenity_vector(genome,devLen,k):
+def homogenity_vector(genome,devLen,devShft,k):
     disVector = []
     gLen = len(genome)
     globalSig = dict_to_normalized_vector(k_mer_naive_with_dict_initialization(genome,k))
     for i in range(gLen-devLen+1):
-        print(i)
-        sec = genome[i:i+devLen]
+        sec = genome[i*devShft:i*devShft+devLen]
         secSig = dict_to_normalized_vector(k_mer_naive_with_dict_initialization(sec,k))
         disVector.append(np.linalg.norm(globalSig-secSig))
-    
-    fig, ax = plt.subplots()
-    ax.plot(disVector)
-    ax.set_title('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
-    ax.set_ylabel('Distance')
-    ax.set_xlabel('Position')
-    plt.show()
-
     return disVector
 
 
 
-#distMat = homogenity_matrix(read_genome(query),1000,3)
-homogenity_vector(read_genome(query),1000,3)
+kList=[3,4,5,6]
+nDivList = [50,100,200,500,1000]
+devLenList = [1000,10000,20000,50000,100000]
+devShiftPer = 0.7   
+    
+for k in kList:
+    for nDiv in nDivList:
+        distMat = homogenity_matrix(read_genome(query),nDiv,k)
+        np.save('distMat' + str(nDiv) + str(k),distMat)
+        #fig, ax = plt.subplots()
+        #cax = ax.imshow(distMat, interpolation='nearest', cmap=cm.coolwarm)
+        #ax.set_title('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+        #cbar = fig.colorbar(cax, ticks=[0, 0, np.max(distMat)])
+        #plt.savefig('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+    
+    for devLen in devLenList:
+        disVector = homogenity_vector(read_genome(query),devLen,int(np.round(devShiftPer*devLen)),k)
+        np.save('distVector' + str(devLen) + str(k),disVector)
+        #fig, ax = plt.subplots()
+        #ax.plot(disVector)
+        #ax.set_title('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+        #ax.set_ylabel('Distance')
+        #ax.set_xlabel('Position')
+        #plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+
 
 """
 plt.matshow(distMat, cmap=plt.cm.Blues)
