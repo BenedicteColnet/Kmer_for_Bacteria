@@ -167,33 +167,18 @@ for k in kList:
     for nDiv in nDivList:
         distMat = homogenity_matrix(read_genome(query),nDiv,k)
         np.save('distMat' + str(nDiv) + str(k),distMat)
-        #fig, ax = plt.subplots()
-        #cax = ax.imshow(distMat, interpolation='nearest', cmap=cm.coolwarm)
-        #ax.set_title('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
-        #cbar = fig.colorbar(cax, ticks=[0, 0, np.max(distMat)])
-        #plt.savefig('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+        fig, ax = plt.subplots()
+        cax = ax.imshow(distMat, interpolation='nearest', cmap=cm.coolwarm)
+        ax.set_title('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+        cbar = fig.colorbar(cax, ticks=[0, 0, np.max(distMat)])
+        plt.savefig('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
     
     for devLen in devLenList:
         disVector = homogenity_vector(read_genome(query),devLen,int(np.round(devShiftPer*devLen)),k)
         np.save('distVector' + str(devLen) + str(k),disVector)
-        #fig, ax = plt.subplots()
-        #ax.plot(disVector)
-        #ax.set_title('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
-        #ax.set_ylabel('Distance')
-        #ax.set_xlabel('Position')
-        #plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
-
-
-"""
-plt.matshow(distMat, cmap=plt.cm.Blues)
-plt.colorbar()
-plt.show()
-
-plt.figure()
-plt.bar(result_with.keys(), result_with.values(), color='g')
-plt.plot()
-
-plt.figure()
-plt.bar(result_without.keys(), result_without.values(), color='g')
-plt.plot()
-"""
+        fig, ax = plt.subplots()
+        ax.plot(disVector)
+        ax.set_title('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+        ax.set_ylabel('Distance')
+        ax.set_xlabel('Position')
+        plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
