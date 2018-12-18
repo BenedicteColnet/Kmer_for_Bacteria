@@ -9,6 +9,7 @@ from itertools import *
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import os
 import time
 
 def read_genome(fileName):
@@ -23,16 +24,17 @@ def read_genome(fileName):
     """
     with open(fileName,'r') as genomeFile:
         lines = genomeFile.readlines()
+    tmp = lines[0].split(' ')
+    genomeName = tmp[1] + '_' + tmp[2]
     genom_sequence = ''
     for line in lines:
-        if not '>' in line: 
+        if not '>' in line:
+            for c in line:
+                if c not in set('ACGT'):
+                    line  = line.replace(c,'')
             genom_sequence += line
     genom_sequence = genom_sequence.replace('\n','')
-    
-    return genom_sequence
-
-
-
+    return (genomeName,genom_sequence)
 
 def k_mer_naive_with_dict_initialization(genome,k):
             
@@ -46,7 +48,7 @@ def k_mer_naive_with_dict_initialization(genome,k):
     """    
     genomLength = len(genome)
     result = {}
-    words=list_of_possible_kmer('ATGC',k)
+    words=list_of_possible_kmer('ACGT',k)
     for wo in words:
         w = ''
         for i in range(k):
@@ -102,7 +104,7 @@ def naive_time_xperiment():
     for k in range(1,14):
         print("Processing with_dict_init, k=",str(k))
         start = time.time()       
-        result_with = k_mer_naive_with_dict_initialization(read_genome(query),k)
+        result_with = k_mer_naive_with_dict_initialization(read_genome(query)[1],k)
         end = time.time()
         with_dic_initialization.append(end-start)
 
@@ -110,7 +112,7 @@ def naive_time_xperiment():
     for k in range(1,14):
         print("Processing without_dict_init, k=",str(k))
         start = time.time()       
-        result_without = k_mer_naive_without_dict_initialization(read_genome(query),k)
+        result_without = k_mer_naive_without_dict_initialization(read_genome(query)[1],k)
         end = time.time()
         without_dic_initialization.append(end-start)
 
@@ -123,7 +125,7 @@ def naive_time_xperiment():
     plt.show()
 
 def dict_to_normalized_vector(dict):
-    vec = np.array(list(dict.values()))
+    vec = np.array(list(dict.values()),dtype=object)
     return vec / sum(vec)
 
 def homogenity_matrix(genome,nDiv,k):
@@ -158,6 +160,7 @@ def homogenity_vector(genome,devLen,devShft,k):
 
 
 
+"""
 kList=[3,4,5,6]
 nDivList = [50,100,200,500,1000]
 devLenList = [1000,10000,20000,50000,100000]
@@ -165,7 +168,7 @@ devShiftPer = 0.7
     
 for k in kList:
     for nDiv in nDivList:
-        distMat = homogenity_matrix(read_genome(query),nDiv,k)
+        distMat = homogenity_matrix(read_genome(query)[1],nDiv,k)
         np.save('distMat' + str(nDiv) + str(k),distMat)
         fig, ax = plt.subplots()
         cax = ax.imshow(distMat, interpolation='nearest', cmap=cm.coolwarm)
@@ -174,7 +177,7 @@ for k in kList:
         plt.savefig('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
     
     for devLen in devLenList:
-        disVector = homogenity_vector(read_genome(query),devLen,int(np.round(devShiftPer*devLen)),k)
+        disVector = homogenity_vector(read_genome(query)[1],devLen,int(np.round(devShiftPer*devLen)),k)
         np.save('distVector' + str(devLen) + str(k),disVector)
         fig, ax = plt.subplots()
         ax.plot(disVector)
@@ -182,3 +185,22 @@ for k in kList:
         ax.set_ylabel('Distance')
         ax.set_xlabel('Position')
         plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+"""
+
+def CreateProfiles(dbPath):
+    profiles = []
+    for filename in os.listdir(dbPath):
+        gName,gSeq = read_genome(dbPath+"/"+filename)
+        prof = (gName,)
+        for k in range(1,8):
+            print("Processing ", gName, ' K: ',k)
+            signature = k_mer_naive_with_dict_initialization(gSeq,k)
+            signature = dict_to_normalized_vector(signature)
+            prof += (signature,)
+        np.save('profile_'+gName,prof)
+        profiles.append(prof)
+    return profiles
+
+profiles = CreateProfiles("..//Database")
+print(profiles)
+np.save('profiles',profiles)
