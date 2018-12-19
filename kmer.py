@@ -17,7 +17,7 @@ def read_genome(fileName):
     """
     ENTRY adress of fasta file with genome (str)
     
-    FUNCTION read the file and extract genome
+    FUNCTION read the file and extract the whole genome
     
     EXIT query only (str)
     
@@ -35,6 +35,21 @@ def read_genome(fileName):
             genom_sequence += line
     genom_sequence = genom_sequence.replace('\n','')
     return (genomeName,genom_sequence)
+
+
+def read_genome_part(fileName,winLen):
+    """
+    ENTRY adress of fasta file with genome (str)
+    
+    FUNCTION read the file and extract part of genome
+    
+    EXIT query only (str)
+    
+    """
+    np.random.seed(winLen)
+    genomeName,genom_sequence = read_genome(fileName)
+    winIndx = int(round(np.random.uniform(0,len(genom_sequence)-winLen)))
+    return (genomeName,genom_sequence[winIndx:winIndx+winLen])
 
 def k_mer_naive_with_dict_initialization(genome,k):
             
@@ -187,20 +202,23 @@ for k in kList:
         plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
 """
 
-def CreateProfiles(dbPath):
+def CreateProfiles(gType,dbPath,wLen):
     profiles = []
     for filename in os.listdir(dbPath):
-        gName,gSeq = read_genome(dbPath+"/"+filename)
-        prof = (gName,)
+        gName,gSeq = read_genome_part(dbPath+"/"+filename,wLen)
+        prof = (gType,gName,)
         for k in range(1,8):
             print("Processing ", gName, ' K: ',k)
             signature = k_mer_naive_with_dict_initialization(gSeq,k)
             signature = dict_to_normalized_vector(signature)
             prof += (signature,)
-        np.save('profile_'+gName,prof)
+        #np.save('profile_'+gName,prof)
         profiles.append(prof)
     return profiles
 
-profiles = CreateProfiles("..//Database")
-print(profiles)
-np.save('profiles',profiles)
+winLen = [1000,2000,5000,10000,20000]
+for l in winLen:
+    for i in range(100): 
+        profiles = CreateProfiles("bact","..//Database",l)
+        #print(profiles)
+        np.save('profiles_l_'+str(l)+'_'+str(i),profiles)
