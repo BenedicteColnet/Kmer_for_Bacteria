@@ -36,21 +36,6 @@ def read_genome(fileName):
     genom_sequence = genom_sequence.replace('\n','')
     return (genomeName,genom_sequence)
 
-
-def read_genome_part(fileName,winLen):
-    """
-    ENTRY adress of fasta file with genome (str)
-    
-    FUNCTION read the file and extract part of genome
-    
-    EXIT query only (str)
-    
-    """
-    np.random.seed(winLen)
-    genomeName,genom_sequence = read_genome(fileName)
-    winIndx = int(round(np.random.uniform(0,len(genom_sequence)-winLen)))
-    return (genomeName,genom_sequence[winIndx:winIndx+winLen])
-
 def k_mer_naive_with_dict_initialization(genome,k):
             
     """
@@ -202,23 +187,37 @@ for k in kList:
         plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
 """
 
-def CreateProfiles(gType,dbPath,wLen):
-    profiles = []
-    for filename in os.listdir(dbPath):
-        gName,gSeq = read_genome_part(dbPath+"/"+filename,wLen)
-        prof = (gType,gName,)
-        for k in range(1,8):
-            print("Processing ", gName, ' K: ',k)
-            signature = k_mer_naive_with_dict_initialization(gSeq,k)
-            signature = dict_to_normalized_vector(signature)
-            prof += (signature,)
-        #np.save('profile_'+gName,prof)
-        profiles.append(prof)
-    return profiles
+def CreateProf(gType,gName,gSeq):
+    prof = (gType,gName,)
+    for k in range(1,8):
+        print("Processing ", gName, ' K: ',k)
+        signature = k_mer_naive_with_dict_initialization(gSeq,k)
+        signature = dict_to_normalized_vector(signature)
+        prof += (signature,)
+    return prof
 
-winLen = [1000,2000,5000,10000,20000]
-for l in winLen:
-    for i in range(100): 
-        profiles = CreateProfiles("bact","..//Database",l)
-        #print(profiles)
-        np.save('profiles_l_'+str(l)+'_'+str(i),profiles)
+def CreateProfiles(gType,dbPath):
+    for filename in os.listdir(dbPath):
+        gName,gSeq = read_genome(dbPath+"/"+filename)
+        gLen = len(gSeq)
+        np.random.seed(int(round(time.time())))
+        #Test dataset (random positions)!
+        profilesTest = []
+        winLen = [1000,2000,5000,10000,20000]
+        for l in winLen:
+            for i in range(10):
+                winIndx = int(round(np.random.uniform(0,gLen-l)))    
+                profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l]))   
+        np.save("test_profiles",profilesTest)
+
+        #Train dataset
+        profilesTrain = []
+        nDiv = 50
+        l = int(np.round(gLen / nDiv))
+        for i in range(nDiv):
+            if((i+1)*l > gLen):
+                break
+            profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l]))
+        np.save("train_profiles",profilesTrain)
+
+CreateProfiles("bact","..//Database")
