@@ -3,14 +3,32 @@
 Classification base on kmer vectors previously build
 """
 
-import numpy as np
+
 import pandas as pd
+import numpy as np
+import keras
+from keras.layers import Dense
+from keras.models import Sequential
+from keras.utils import to_categorical
+import sklearn
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_validate
 from itertools import *
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn import cluster
 from sklearn.cluster import KMeans
 
+"""
+breastX_train, breastX_test, breastY_train, breastY_test = train_test_split(breastX, breastY, test_size=0.3, random_state=0)
+modelBreast = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5)).fit(breastX_train, breastY_train)
+breastYTest_predicted = modelBreast.predict(breastX_test)
+breastScore = modelBreast.score(breastX_test, breastY_test)
+model_breast = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
+cvscores_breast_sk = sklearn.model_selection.cross_val_score(model_breast, breastX, breastY, cv=10)*100
+"""
 
 """
 OBJECT CONSIDERED
