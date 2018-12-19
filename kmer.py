@@ -190,34 +190,34 @@ for k in kList:
 def CreateProf(gType,gName,gSeq):
     prof = (gType,gName,)
     for k in range(1,8):
-        print("Processing ", gName, ' K: ',k)
         signature = k_mer_naive_with_dict_initialization(gSeq,k)
         signature = dict_to_normalized_vector(signature)
         prof += (signature,)
     return prof
 
 def CreateProfiles(gType,dbPath):
+    profilesTest = []
+    profilesTrain = []
     for filename in os.listdir(dbPath):
         gName,gSeq = read_genome(dbPath+"/"+filename)
+        print("Processing ", gName)
         gLen = len(gSeq)
         np.random.seed(int(round(time.time())))
         #Test dataset (random positions)!
-        profilesTest = []
         winLen = [1000,2000,5000,10000,20000]
         for l in winLen:
             for i in range(10):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
-                profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l]))   
-        np.save("test_profiles",profilesTest)
-
+                profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l]))
         #Train dataset
-        profilesTrain = []
         nDiv = 50
         l = int(np.round(gLen / nDiv))
         for i in range(nDiv):
             if((i+1)*l > gLen):
                 break
             profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l]))
-        np.save("train_profiles",profilesTrain)
+    
+    np.save("test_profiles",profilesTest)
+    np.save("train_profiles",profilesTrain)
 
 CreateProfiles("bact","..//Database")
