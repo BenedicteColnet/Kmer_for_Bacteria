@@ -22,18 +22,8 @@ from sklearn import cluster
 from sklearn.cluster import KMeans
 
 """
-breastX_train, breastX_test, breastY_train, breastY_test = train_test_split(breastX, breastY, test_size=0.3, random_state=0)
-modelBreast = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5)).fit(breastX_train, breastY_train)
-breastYTest_predicted = modelBreast.predict(breastX_test)
-breastScore = modelBreast.score(breastX_test, breastY_test)
-model_breast = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
-cvscores_breast_sk = sklearn.model_selection.cross_val_score(model_breast, breastX, breastY, cv=10)*100
-"""
-
-"""
 OBJECT CONSIDERED
 Tuple (type, name, 1-mer, 2-mer, 3-mer, and so on)
-
 """
 # FUNCTIONS 
 
@@ -97,6 +87,10 @@ def clustering_kmean(X,nb_of_clusters=3):
     return km
 
 def from_Yasser_output_to_tuples(name_of_npy):
+    """
+    ENTRY Database name
+    OUT data base in shape [('bact','name',[0-mer],[1-mer],[2-mer], etc...),(),()]
+    """
     data=np.load(name_of_npy)
     output=[]
     for item in data:
@@ -108,6 +102,31 @@ def from_Yasser_output_to_tuples(name_of_npy):
                 prof += (list(i),)
         output.append(prof)
     return output
+
+
+def neural_network_from_dataframe(X, y):
+    model = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(10, 5)).fit(X,y)
+    return model
+
+def only_testing_neural_network(X_test,Y_test,model):
+     #YTest_predicted = model.predict(X_test)   
+     Score = model.score(X_test,Y_test)
+     return Score
+ 
+def cross_val_neural_network(X,Y,cross_val=5):
+    model= MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
+    cvscores = sklearn.model_selection.cross_val_score(model, X, Y, cv=cross_val)*100
+    return cvscores
+
+def process_output_kmer_into_X_and_y_df(name_of_npy, list_of_k):
+    mapping=np.load("mapping.npy")
+    tuples=from_Yasser_output_to_tuples(name_of_npy)
+    df=from_tuples_to_dataframe(tuples, list_of_k)
+    df_numerized=df.replace({'Name': mapping})
+    Y=df_numerized["Name"]
+    X=df_numerized.drop(['Type', 'Name'], axis=1)
+    return X, Y
+
 
 """
 Test area
@@ -124,11 +143,14 @@ tuples_test=[('bact','a',[0.5,0,0.5,0]),('bact','b',[0,0.5,0,0.5]), ('bact','c',
 #plt.scatter(resPCA[:, 0], resPCA[:, 1], s=10, c=cluster_classifier.labels_)
 
 
-data_tuples=from_Yasser_output_to_tuples("profiles.npy")
-df=from_tuples_to_dataframe(data_tuples,[3])
-resPCA=Principal_composant_analysis(df)
-#plt.scatter(resPCA[:, 0], resPCA[:, 1],marker='o',s=25, edgecolor='k')
-cluster_classifier=clustering_kmean(resPCA)
-plt.scatter(resPCA[:, 0], resPCA[:, 1], s=10, c=cluster_classifier.labels_)
-plt.savefig("one_two_3_mer_PCA_2.png")
+X, y= process_output_kmer_into_X_and_y_df("profiles.npy", [1])
 
+
+
+X_test, y_test= process_output_kmer_into_X_and_y_df("test_profiles.npy", [1])#
+model=neural_network_from_dataframe(X, y)
+#score = only_testing_neural_network(X_test,y_test,model)
+
+
+
+  
