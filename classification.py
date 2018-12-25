@@ -94,7 +94,7 @@ def from_Yasser_output_to_tuples(name_of_npy):
     data=np.load(name_of_npy)
     output=[]
     for item in data:
-        prof = ('bact',)
+        prof = ()
         for i in item:
             if type(i)==str:
                 prof+=(i,)
@@ -113,7 +113,8 @@ def only_testing_neural_network(X_test,Y_test,model):
      Score = model.score(X_test,Y_test)
      return Score
  
-def cross_val_neural_network(X,Y,cross_val=5):
+def cross_val_neural_network(X,Y,cross_val=10):
+    labels = pd.factorize(Y)
     model= MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
     cvscores = sklearn.model_selection.cross_val_score(model, X, Y, cv=cross_val)*100
     return cvscores
@@ -143,12 +144,14 @@ tuples_test=[('bact','a',[0.5,0,0.5,0]),('bact','b',[0,0.5,0,0.5]), ('bact','c',
 #plt.scatter(resPCA[:, 0], resPCA[:, 1], s=10, c=cluster_classifier.labels_)
 
 
-X, y= process_output_kmer_into_X_and_y_df("profiles.npy", [1])
+#X, y= process_output_kmer_into_X_and_y_df("profiles.npy", [1])
 
 
 
-X_test, y_test= process_output_kmer_into_X_and_y_df("test_profiles.npy", [1])#
-model=neural_network_from_dataframe(X, y)
+X, y = process_output_kmer_into_X_and_y_df("train_profiles_small.npy", [3,4])#
+scores = cross_val_neural_network(X,y,10)
+print(scores)
+#model=neural_network_from_dataframe(X, y)
 #score = only_testing_neural_network(X_test,y_test,model)
 
 
