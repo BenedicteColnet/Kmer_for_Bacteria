@@ -187,15 +187,15 @@ for k in kList:
         plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
 """
 
-def CreateProf(gType,gName,gSeq):
+def CreateProf(gType,gName,gSeq,kMax):
     prof = (gType,gName,)
-    for k in range(1,8):
+    for k in range(1,kMax+1):
         signature = k_mer_naive_with_dict_initialization(gSeq,k)
         signature = dict_to_normalized_vector(signature)
         prof += (signature,)
     return prof
 
-def CreateProfiles(gType,dbPath):
+def CreateProfiles(gType,dbPath,kMax):
     profilesTest = []
     profilesTrain = []
     for filename in os.listdir(dbPath):
@@ -203,21 +203,25 @@ def CreateProfiles(gType,dbPath):
         print("Processing ", gName)
         gLen = len(gSeq)
         np.random.seed(int(round(time.time())))
+
+        """
         #Test dataset (random positions)!
         winLen = [1000,2000,5000,10000,20000]
         for l in winLen:
             for i in range(10):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
-                profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l]))
+                profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l],kMax))
+        """
+        
         #Train dataset
         nDiv = 50
         l = int(np.round(gLen / nDiv))
         for i in range(nDiv):
             if((i+1)*l > gLen):
                 break
-            profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l]))
+            profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l],kMax))
     
     np.save("test_profiles",profilesTest)
     np.save("train_profiles",profilesTrain)
 
-CreateProfiles("bact","..//Database")
+CreateProfiles("bact","..//Database",5)
