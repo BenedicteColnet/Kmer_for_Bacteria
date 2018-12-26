@@ -123,6 +123,7 @@ def process_output_kmer_into_X_and_y_df(name_of_npy, list_of_k):
     mapping=np.load("mapping.npy")
     tuples=from_Yasser_output_to_tuples(name_of_npy)
     df=from_tuples_to_dataframe(tuples, list_of_k)
+    df=df.sample(frac=1)
     df_numerized=df.replace({'Name': mapping})
     Y=df_numerized["Name"]
     X=df_numerized.drop(['Type', 'Name'], axis=1)
