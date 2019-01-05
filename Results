@@ -1,5 +1,6 @@
 Database: 54 species
 Number of parts: 50
+Overlap = No
 K: 3 and 4
 PCA: No
 MLP CV, Accuracy: 0.09 (+/- 0.18), total time: 4.904338
@@ -17,6 +18,7 @@ SVM CV, Kernel: rbf, C value: 10 Accuracy: 0.52 (+/- 0.27), total time: 36.16207
 
 Database: 54 species
 Number of parts: 50
+Overlap = No
 K: 2,3,4,5
 PCA: 40
 MLP CV, Accuracy: 23.20% (+/- 20.64%), total time: 5.646502 s
@@ -34,6 +36,7 @@ SVM CV, Kernel: rbf, C value: 10, Accuracy: 51.81% (+/- 26.67%), total time: 7.7
 
 Database: 54 species
 Number of parts: 50
+Overlap = No
 K: 2,3,4
 PCA: 20
 MLP CV, Accuracy: 18.21% (+/- 22.59%), total time: 5.093016 s
@@ -51,6 +54,7 @@ SVM CV, Kernel: rbf, C value: 10, Accuracy: 51.49% (+/- 25.23%), total time: 5.3
 
 Database: 54 species
 Number of parts: 50
+Overlap = No
 K: 2,3,4
 PCA: 50
 MLP CV, Accuracy: 17.54% (+/- 32.39%), total time: 4.451132 s
@@ -68,6 +72,7 @@ SVM CV, Kernel: rbf, C value: 10, Accuracy: 51.60% (+/- 25.43%), total time: 8.7
 
 Database: 54 species
 Number of parts: 50
+Overlap = No
 K: 2,3,4,5
 PCA: 50
 MLP CV, Accuracy: 11.82% (+/- 28.37%), total time: 2.723283 s
