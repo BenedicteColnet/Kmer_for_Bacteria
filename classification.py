@@ -16,7 +16,10 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_validate
 from itertools import *
-from sklearn.decomposition import PCA
+
+from sklearn.decomposition import PCA, IncrementalPCA, KernelPCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
 import matplotlib.pyplot as plt
 from sklearn import cluster
 from sklearn.cluster import KMeans
@@ -42,7 +45,7 @@ def list_of_possible_kmer(letters,k):
     return words
 
 
-def from_tuples_to_dataframe(data_as_tuples, list_of_k):
+def Tuples2DF(data_as_tuples, list_of_k):
     """
     ENTRY list of tuples, list of Ks to concatenate
     OUT Dataframe
@@ -69,10 +72,9 @@ def Principal_composant_analysis(data_as_df, number_of_component=2):
     """
     ENTRY Array with rows as items, and column as features (kmer concatenated)
     OUT number of principal components asked
-    """
-    pca = PCA(number_of_component)
-    #X=data_as_df.loc[:,2:].asMatrix()
-    X=data_as_df.values[:,2:]
+    """    
+    pca = PCA(n_components=number_of_component)
+    #X=data_as_df.values[:,2:]
     pca.fit(X)
     X_pca = pca.transform(X)
     return X_pca
@@ -86,7 +88,7 @@ def clustering_kmean(X,nb_of_clusters=3):
     km.fit(X)
     return km
 
-def from_Yasser_output_to_tuples(name_of_npy):
+def PreProcessTuples(name_of_npy):
     """
     ENTRY Database name
     OUT data base in shape [('bact','name',[0-mer],[1-mer],[2-mer], etc...),(),()]
@@ -103,7 +105,7 @@ def from_Yasser_output_to_tuples(name_of_npy):
         output.append(prof)
     return output
 
-
+"""
 def neural_network_from_dataframe(X, y):
     model = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(10, 5)).fit(X,y)
     return model
@@ -112,16 +114,16 @@ def only_testing_neural_network(X_test,Y_test,model):
      #YTest_predicted = model.predict(X_test)   
      Score = model.score(X_test,Y_test)
      return Score
+"""
  
-def cross_val_neural_network(X,Y,cross_val=10):
-    model= MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
-    cvscores = sklearn.model_selection.cross_val_score(model, X, Y, cv=cross_val)*100
+def CrossValidation(X,Y,cross_val=10):
+    cvscores = sklearn.model_selection.cross_val_score(model, X, Y, cv=cross_val, scoring='roc_auc')*100
     return cvscores
 
-def process_output_kmer_into_X_and_y_df(name_of_npy, list_of_k):
+def PreProcessKmerData(name_of_npy, list_of_k):
     #mapping=np.load("mapping.npy")
-    tuples=from_Yasser_output_to_tuples(name_of_npy)
-    df=from_tuples_to_dataframe(tuples, list_of_k)
+    tuples=PreProcessTuples(name_of_npy)
+    df=Tuples2DF(tuples, list_of_k)
     df=df.sample(frac=1)
     #df_numerized=df.replace({'Name': mapping})
     #Y=df_numerized["Name"]
@@ -131,6 +133,17 @@ def process_output_kmer_into_X_and_y_df(name_of_npy, list_of_k):
     return X, Y
 
 
+X, y = PreProcessKmerData("train_profiles_10.npy", [3,4])
+modelMLP = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
+scores = CrossValidation(modelMLP,X,y,10)
+print(scores)
+#model=neural_network_from_dataframe(X, y)
+#score = only_testing_neural_network(X_test,y_test,model)
+
+
+
+
+########################################################################################################################
 """
 Test area
 """
@@ -140,23 +153,11 @@ tuples_test=[('bact','a',[0.5,0,0.5,0]),('bact','b',[0,0.5,0,0.5]), ('bact','c',
              ('bact','e',[0.9,0,0.1,0.]), ('bact','f',[0,0.1,0,0.9]), ('bact','g',[0,0.3,0.1,0.6]), ('bact','h',[0,0.2,0,0.8])
                     ]
 """
-#res=from_tuples_to_dataframe(tuples_test,[1])
+#res=Tuples2DF(tuples_test,[1])
 #resPCA=Principal_composant_analysis(res)
 #plt.scatter(resPCA[:, 0], resPCA[:, 1],marker='o',s=25, edgecolor='k')
 #cluster_classifier=clustering_kmean(resPCA)
 #plt.scatter(resPCA[:, 0], resPCA[:, 1], s=10, c=cluster_classifier.labels_)
 
 
-#X, y= process_output_kmer_into_X_and_y_df("profiles.npy", [1])
-
-
-
-X, y = process_output_kmer_into_X_and_y_df("train_profiles_small.npy", [3,4])#
-scores = cross_val_neural_network(X,y,10)
-print(scores)
-#model=neural_network_from_dataframe(X, y)
-#score = only_testing_neural_network(X_test,y_test,model)
-
-
-
-  
+#X, y= PreProcessKmer("profiles.npy", [1])

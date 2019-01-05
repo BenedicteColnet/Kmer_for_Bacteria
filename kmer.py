@@ -221,7 +221,7 @@ def CreateProfiles(gType,dbPath,kMax):
                 break
             profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l],kMax))
     
-    np.save("test_profiles",profilesTest)
-    np.save("train_profiles",profilesTrain)
+    np.save("test_profiles", profilesTest)
+    np.save("train_profiles_"+str(nDiv), profilesTrain)
 
 CreateProfiles("bact","..//Database",5)
