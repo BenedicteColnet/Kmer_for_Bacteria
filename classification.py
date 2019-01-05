@@ -133,8 +133,8 @@ def AnalyzeNNMLP(X,y,pcaNC=False):
     modelMLP = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
     #scoresMLP, totalDurMLP = CrossValidation(modelMLP,data,y,10)
     scoresMLP, totalDurMLP = CrossValidationStratification(modelMLP,data,y,10)
-    print("MLP CV, Accuracy: %0.2f (+/- %0.2f), total time: %f" 
-          % (scoresMLP.mean(), scoresMLP.std() * 2, totalDurMLP))
+    print("MLP CV, Accuracy: %0.2f%% (+/- %0.2f%%), total time: %f S" 
+          % (scoresMLP.mean()*100, scoresMLP.std()*100 * 2, totalDurMLP))
 
 def AnalyzeNLSVM(X,y,pcaNC=False):
     if pcaNC != False:
@@ -146,8 +146,8 @@ def AnalyzeNLSVM(X,y,pcaNC=False):
             modelSVM = svm.SVC(gamma = 'auto', C=cValue, kernel=kern)
             #scoresSVM, totalDurSVM = CrossValidation(modelSVM,data,y,10)
             scoresSVM, totalDurSVM = CrossValidationStratification(modelSVM,data,y,10)
-            print("SVM CV, Kernel: " + kern + ", C value: " + str(cValue) + " Accuracy: %0.2f (+/- %0.2f), total time: %f" 
-                  % (scoresSVM.mean(), scoresSVM.std() * 2, totalDurSVM))
+            print("SVM CV, Kernel: " + kern + ", C value: " + str(cValue) + " Accuracy: %0.2f%% (+/- %0.2f%%), total time: %f S" 
+                  % (scoresSVM.mean()*100, scoresSVM.std()*100 * 2, totalDurSVM))
 
 def PreProcessKmerData(name_of_npy, list_of_k):
     #mapping=np.load("mapping.npy")
@@ -162,14 +162,14 @@ def PreProcessKmerData(name_of_npy, list_of_k):
     return X, Y
 
 
-X, y = PreProcessKmerData("train_profiles_10.npy", [3,4])
+X, y = PreProcessKmerData("train_profiles_50.npy", [3,4])
 
 X_pca = ApplyPCA(X,2)
 plt.scatter(X_pca[:, 0], X_pca[:, 1],marker="o", c=y,s=25, edgecolor="k")
 plt.savefig('2_Components')
 
-AnalyzeNNMLP(X.values,y,2)
-AnalyzeNLSVM(X.values,y,2)
+AnalyzeNNMLP(X.values,y,10)
+AnalyzeNLSVM(X.values,y,10)
 
 
 
