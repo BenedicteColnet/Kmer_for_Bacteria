@@ -114,19 +114,20 @@ def only_testing_neural_network(X_test,Y_test,model):
      return Score
  
 def cross_val_neural_network(X,Y,cross_val=10):
-    labels = pd.factorize(Y)
     model= MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
     cvscores = sklearn.model_selection.cross_val_score(model, X, Y, cv=cross_val)*100
     return cvscores
 
 def process_output_kmer_into_X_and_y_df(name_of_npy, list_of_k):
-    mapping=np.load("mapping.npy")
+    #mapping=np.load("mapping.npy")
     tuples=from_Yasser_output_to_tuples(name_of_npy)
     df=from_tuples_to_dataframe(tuples, list_of_k)
     df=df.sample(frac=1)
-    df_numerized=df.replace({'Name': mapping})
-    Y=df_numerized["Name"]
-    X=df_numerized.drop(['Type', 'Name'], axis=1)
+    #df_numerized=df.replace({'Name': mapping})
+    #Y=df_numerized["Name"]
+    #X=df_numerized.drop(['Type', 'Name'], axis=1)
+    Y = pd.factorize(df["Name"])
+    X=df.drop(['Type', 'Name'], axis=1)    
     return X, Y
 
 
@@ -134,10 +135,11 @@ def process_output_kmer_into_X_and_y_df(name_of_npy, list_of_k):
 Test area
 """
 
-
+"""
 tuples_test=[('bact','a',[0.5,0,0.5,0]),('bact','b',[0,0.5,0,0.5]), ('bact','c',[0,0,0,1]), ('bact','d',[0,0.2,0,0.8]),
              ('bact','e',[0.9,0,0.1,0.]), ('bact','f',[0,0.1,0,0.9]), ('bact','g',[0,0.3,0.1,0.6]), ('bact','h',[0,0.2,0,0.8])
                     ]
+"""
 #res=from_tuples_to_dataframe(tuples_test,[1])
 #resPCA=Principal_composant_analysis(res)
 #plt.scatter(resPCA[:, 0], resPCA[:, 1],marker='o',s=25, edgecolor='k')
