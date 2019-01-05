@@ -67,15 +67,15 @@ def Tuples2DF(data_as_tuples, list_of_k):
     df = pd.DataFrame(stock, columns=kmer_vector)
     return df
 
-def Principal_composant_analysis(data_as_df, number_of_component=2):
+def ApplyPCA(X, nComp=2):
     """
     ENTRY Array with rows as items, and column as features (kmer concatenated)
     OUT number of principal components asked
     """    
-    pca = PCA(n_components=number_of_component)
+    pcaM = PCA(n_components=nComp)
     #X=data_as_df.values[:,2:]
-    pca.fit(X)
-    X_pca = pca.transform(X)
+    pcaM.fit(X)
+    X_pca = pcaM.transform(X)
     return X_pca
 
 def clustering_kmean(X,nb_of_clusters=3):
@@ -125,19 +125,27 @@ def CrossValidationStratification(model,X,Y,cross_val=10):
     return cvScores,endT-startT
 
 
-def AnalyzeNNMLP(X,y):
+def AnalyzeNNMLP(X,y,pcaNC=False):
+    if pcaNC != False:
+        data = ApplyPCA(X,pcaNC)
+    else:
+        data = X
     modelMLP = MLPClassifier(solver='lbfgs', alpha=1e-7,hidden_layer_sizes=(10, 5))
-    #scoresMLP, totalDurMLP = CrossValidation(modelMLP,X,y,10)
-    scoresMLP, totalDurMLP = CrossValidationStratification(modelMLP,X,y,10)
+    #scoresMLP, totalDurMLP = CrossValidation(modelMLP,data,y,10)
+    scoresMLP, totalDurMLP = CrossValidationStratification(modelMLP,data,y,10)
     print("MLP CV, Accuracy: %0.2f (+/- %0.2f), total time: %f" 
           % (scoresMLP.mean(), scoresMLP.std() * 2, totalDurMLP))
 
-def AnalyzeNLSVM(X,y):
+def AnalyzeNLSVM(X,y,pcaNC=False):
+    if pcaNC != False:
+        data = ApplyPCA(X,pcaNC)
+    else:
+        data = X
     for kern in ['linear', 'poly', 'rbf']:
         for cValue in [10e-9,0.1,10]:
             modelSVM = svm.SVC(gamma = 'auto', C=cValue, kernel=kern)
-            #scoresSVM, totalDurSVM = CrossValidation(modelSVM,X,y,10)
-            scoresSVM, totalDurSVM = CrossValidationStratification(modelSVM,X,y,10)
+            #scoresSVM, totalDurSVM = CrossValidation(modelSVM,data,y,10)
+            scoresSVM, totalDurSVM = CrossValidationStratification(modelSVM,data,y,10)
             print("SVM CV, Kernel: " + kern + ", C value: " + str(cValue) + " Accuracy: %0.2f (+/- %0.2f), total time: %f" 
                   % (scoresSVM.mean(), scoresSVM.std() * 2, totalDurSVM))
 
@@ -155,8 +163,13 @@ def PreProcessKmerData(name_of_npy, list_of_k):
 
 
 X, y = PreProcessKmerData("train_profiles_10.npy", [3,4])
-AnalyzeNNMLP(X.values,y)
-AnalyzeNLSVM(X.values,y)
+
+X_pca = ApplyPCA(X,2)
+plt.scatter(X_pca[:, 0], X_pca[:, 1],marker="o", c=y,s=25, edgecolor="k")
+plt.savefig('2_Components')
+
+AnalyzeNNMLP(X.values,y,2)
+AnalyzeNLSVM(X.values,y,2)
 
 
 

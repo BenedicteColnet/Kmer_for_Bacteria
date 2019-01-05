@@ -1,0 +1,16 @@
+Database: 54 species
+Number of parts: 50
+K: 3 and 4
+PCA: No
+MLP CV, Accuracy: 0.09 (+/- 0.18), total time: 4.904338
+SVM CV, Kernel: linear, C value: 1e-08 Accuracy: 0.52 (+/- 0.27), total time: 32.432978
+SVM CV, Kernel: linear, C value: 0.1 Accuracy: 0.52 (+/- 0.27), total time: 32.477214
+SVM CV, Kernel: linear, C value: 10 Accuracy: 0.57 (+/- 0.24), total time: 22.170919
+SVM CV, Kernel: poly, C value: 1e-08 Accuracy: 0.14 (+/- 0.02), total time: 32.802888
+SVM CV, Kernel: poly, C value: 0.1 Accuracy: 0.52 (+/- 0.27), total time: 33.266765
+SVM CV, Kernel: poly, C value: 10 Accuracy: 0.52 (+/- 0.27), total time: 33.106158
+SVM CV, Kernel: rbf, C value: 1e-08 Accuracy: 0.52 (+/- 0.27), total time: 36.573621
+SVM CV, Kernel: rbf, C value: 0.1 Accuracy: 0.52 (+/- 0.27), total time: 36.516388
+SVM CV, Kernel: rbf, C value: 10 Accuracy: 0.52 (+/- 0.27), total time: 36.162077
+
+=================================================================================================
