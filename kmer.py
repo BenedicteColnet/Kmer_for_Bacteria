@@ -128,7 +128,7 @@ def dict_to_normalized_vector(dict):
     vec = np.array(list(dict.values()),dtype=object)
     return vec / sum(vec)
 
-def homogenity_matrix(genome,nDiv,k):
+def homogeneity_matrix(genome,nDiv,k):
     seqSections = []
     seqSignature = []
     gLen = len(genome)
@@ -148,7 +148,7 @@ def homogenity_matrix(genome,nDiv,k):
     return disMat
 
 #comparing with global
-def homogenity_vector(genome,devLen,devShft,k):
+def homogeneity_vector(genome,devLen,devShft,k):
     disVector = []
     gLen = len(genome)
     globalSig = dict_to_normalized_vector(k_mer_naive_with_dict_initialization(genome,k))
@@ -168,23 +168,23 @@ devShiftPer = 0.7
     
 for k in kList:
     for nDiv in nDivList:
-        distMat = homogenity_matrix(read_genome(query)[1],nDiv,k)
+        distMat = homogeneity_matrix(read_genome(query)[1],nDiv,k)
         np.save('distMat' + str(nDiv) + str(k),distMat)
         fig, ax = plt.subplots()
         cax = ax.imshow(distMat, interpolation='nearest', cmap=cm.coolwarm)
-        ax.set_title('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+        ax.set_title('Homogeneity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
         cbar = fig.colorbar(cax, ticks=[0, 0, np.max(distMat)])
-        plt.savefig('Homogenity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
+        plt.savefig('Homogeneity Matrix, nDiv= ' + str(nDiv) + ', k= ' + str(k))
     
     for devLen in devLenList:
-        disVector = homogenity_vector(read_genome(query)[1],devLen,int(np.round(devShiftPer*devLen)),k)
+        disVector = homogeneity_vector(read_genome(query)[1],devLen,int(np.round(devShiftPer*devLen)),k)
         np.save('distVector' + str(devLen) + str(k),disVector)
         fig, ax = plt.subplots()
         ax.plot(disVector)
-        ax.set_title('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+        ax.set_title('Homogeneity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
         ax.set_ylabel('Distance')
         ax.set_xlabel('Position')
-        plt.savefig('Homogenity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
+        plt.savefig('Homogeneity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
 """
 
 def CreateProf(gType,gName,gSeq,kMax):
@@ -222,6 +222,6 @@ def CreateProfiles(gType,dbPath,kMax):
             profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l],kMax))
     
     np.save("test_profiles", profilesTest)
-    np.save("train_profiles_"+str(nDiv), profilesTrain)
+    np.save("train_profiles_D"+str(nDiv), profilesTrain)
 
 CreateProfiles("bact","..//Database",5)
