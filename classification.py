@@ -162,11 +162,11 @@ def PreProcessKmerData(name_of_npy, list_of_k):
     return X, Y
 
 
-X, y = PreProcessKmerData("Profiles/train_profiles_D50.npy", [2,3,4,5])
+X, y = PreProcessKmerData("Profiles/train_profiles_L10000.npy", [2,3,4,5])
 
 X_pca = ApplyPCA(X,2)
 plt.scatter(X_pca[:, 0], X_pca[:, 1],marker="o", c=y,s=25, edgecolor="k")
-plt.savefig('2ComponentsPlots/D50_k2345')
+plt.savefig('2ComponentsPlots/L10000_k2345')
 
 AnalyzeNNMLP(X.values,y,50)
 AnalyzeNLSVM(X.values,y,50)
