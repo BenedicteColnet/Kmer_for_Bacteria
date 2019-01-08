@@ -205,21 +205,14 @@ def CreateProfiles(gType,dbPath,kMax):
         np.random.seed(int(round(time.time())))
 
         #Test dataset (random positions)!
-        winLen = [1000,2000,5000,10000,20000]
-        for l in winLen:
+        steps = range(3,7)
+        for s in steps:
+            l = 5**s
             for i in range(10):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
                 profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l],kMax))
         
         #Train dataset
-        """
-        nDiv = 50
-        l = int(np.round(gLen / nDiv))
-        for i in range(nDiv):
-            if((i+1)*l > gLen):
-                break
-            profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l],kMax))
-        """
         l = 10000
         i=0
         while((i+1)*l < gLen):
@@ -229,4 +222,4 @@ def CreateProfiles(gType,dbPath,kMax):
     np.save("test_profiles", profilesTest)
     np.save("train_profiles_L"+str(l), profilesTrain)
 
-CreateProfiles("bact","..//Database",6)
+CreateProfiles("bact","..//Database",5)
