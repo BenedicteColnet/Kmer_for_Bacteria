@@ -24,6 +24,7 @@ from sklearn.cluster import KMeans
 from itertools import *
 import matplotlib.pyplot as plt
 import time
+import pickle
 
 
 """
@@ -50,7 +51,7 @@ def Tuples2DF(data_as_tuples, list_of_k):
     OUT Dataframe
     """
     #Header
-    kmer_vector=['Type','Name']
+    kmer_vector=['Type','Name','Length']
     for c in list_of_k:
         kmer_vector+=list_of_possible_kmer('ACGT',c)
         
@@ -58,10 +59,10 @@ def Tuples2DF(data_as_tuples, list_of_k):
     stock=[]
     for t in data_as_tuples:
         #item=[t[1]]
-        item=[t[0],t[1]]
+        item=[t[0],t[1],t[2]]
         for k in list_of_k:
             #item=item+t[k+1]
-            for j in t[k+1]:
+            for j in t[k+2]:
                 item.append(j)
         stock.append(item)
     df = pd.DataFrame(stock, columns=kmer_vector)
@@ -149,7 +150,7 @@ def AnalyzeNLSVM(X,y,pcaNC=False):
             print("SVM CV, Kernel: " + kern + ", C value: " + str(cValue) + ", Accuracy: %0.2f%% (+/- %0.2f%%), total time: %f s" 
                   % (scoresSVM.mean()*100, scoresSVM.std()*100 * 2, totalDurSVM))
 
-def PreProcessKmerData(name_of_npy, list_of_k):
+def PreProcessKmerDataTrain(name_of_npy, list_of_k):
     #mapping=np.load("mapping.npy")
     tuples=PreProcessTuples(name_of_npy)
     df=Tuples2DF(tuples, list_of_k)
@@ -158,11 +159,41 @@ def PreProcessKmerData(name_of_npy, list_of_k):
     #Y=df_numerized["Name"]
     #X=df_numerized.drop(['Type', 'Name'], axis=1)
     Y = pd.factorize(df["Name"])[0]
-    X=df.drop(['Type', 'Name'], axis=1)    
+    X=df.drop(['Type', 'Name', 'Length'], axis=1)    
     return X, Y
 
+def PreProcessKmerDataTest(name_of_npy, list_of_k):
+    groups = dict()
+    tuples=PreProcessTuples(name_of_npy)
+    df=Tuples2DF(tuples, list_of_k)
+    df=df.sample(frac=1) #For suffle
+    Y = pd.factorize(df["Name"])[0]
+    for index, sample in df.iterrows():
+        spcs = sample["Name"]
+        if spcs not in groups.keys():
+            groups[spcs] = {}
+        l = sample["Length"]
+        if l not in groups[spcs].keys():
+            groups[spcs][l] = ([],[])
+        groups[spcs][l][1].append(Y[index])
+        groups[spcs][l][0].append(sample.drop(['Type', 'Name', 'Length']).values)   
+    return groups
 
-X, y = PreProcessKmerData("Profiles/train_profiles_L10000.npy", [2,3,4,5])
+def SaveModel(folder,model,file):
+    fHandler = open(folder+'/'+file,'wb')
+    pickle.dump(model, fHandler)
+    fHandler.close()
+
+def LoadModel(fileName):
+    fHandler = open(fileName,'rb')
+    loaded_model = pickle.load(fHandler)
+    fHandler.close()
+    return loaded_model
+
+
+#CROSS VALIDATION
+"""
+X, y = PreProcessKmerDataTrain("Profiles/train_profiles_L10000.npy", [2,3,4,5])
 
 X_pca = ApplyPCA(X,2)
 plt.scatter(X_pca[:, 0], X_pca[:, 1],marker="o", c=y,s=25, edgecolor="k")
@@ -170,11 +201,48 @@ plt.savefig('2ComponentsPlots/L10000_k2345')
 
 AnalyzeNNMLP(X.values,y,50)
 AnalyzeNLSVM(X.values,y,50)
+"""
 
 
+#PRACTICAL TEST
+nPC = 50
+"""
+cValue = 10
+kern = "linear"
+X, y = PreProcessKmerDataTrain("Profiles/train_profiles_L5000.npy", [2,3,4,5])
+X = ApplyPCA(X.values,nPC)
+modelSVM = svm.SVC(gamma = 'auto', C=cValue, kernel=kern).fit(X,y)
+SaveModel('Models',modelSVM,'model_profiles_L5000')
+"""
+modelSVM = LoadModel('Models/model_profiles_L5000')
 
+groups = PreProcessKmerDataTest("Profiles/test_profiles.npy", [2,3,4,5])
 
+results = []
+for spcs in groups.keys():
+    print(spcs)
+    rslt = []
+    for l, data in groups[spcs].items():
+        x = ApplyPCA(np.array(data[0]),nPC)
+        y = data[1]
+        rslt.append(modelSVM.score(x,y))
+    results.append(rslt)
+results = np.array(results)
 
+np.save('plotResults',results)
+#results = np.load('plotResults.npy')
+
+result_mean = []
+result_std = []
+for i in range(len(results[0])):
+    result_mean.append(np.mean(results[:,i]))
+    result_std.append(np.std(results[:,i]))
+
+plt.errorbar(range(len(results[0])),result_mean,result_std,xerr=None, fmt='o', ecolor='r', capthick=2, barsabove=True, linestyle='-',color='b')
+plt.xlabel('Length of sequence')
+plt.ylabel('Accuracy')
+plt.legend()    
+plt.savefig('plotResults')
 
 
 ########################################################################################################################
