@@ -139,3 +139,33 @@ SVM CV, Kernel: poly, C value: 10, Accuracy: 4.94% (+/- 0.05%), total time: 146.
 SVM CV, Kernel: rbf, C value: 1e-08, Accuracy: 4.94% (+/- 0.05%), total time: 260.297513 s
 SVM CV, Kernel: rbf, C value: 0.1, Accuracy: 4.94% (+/- 0.05%), total time: 260.234789 s
 SVM CV, Kernel: rbf, C value: 10, Accuracy: 42.74% (+/- 1.07%), total time: 162.649774 s
+
+====================================================================================================
+
+Database: 54 species
+Length of each part: 5000
+Overlap = No
+K: 2,3,4,5
+PCA: 50
+MLP CV, Accuracy: 24.02% (+/- 8.72%), total time: 87.766189 s
+SVM CV, Kernel: linear, C value: 1e-08, Accuracy: 4.94% (+/- 0.02%), total time: 1058.326299 s
+SVM CV, Kernel: linear, C value: 0.1, Accuracy: 10.38% (+/- 0.32%), total time: 950.061161 s
+SVM CV, Kernel: linear, C value: 10, Accuracy: 94.20% (+/- 0.86%), total time: 221.771040 s
+SVM CV, Kernel: poly, C value: 1e-08, Accuracy: 4.94% (+/- 0.02%), total time: 1126.927827 s
+SVM CV, Kernel: poly, C value: 0.1, Accuracy: 4.94% (+/- 0.02%), total time: 1141.124345 s
+SVM CV, Kernel: poly, C value: 10, Accuracy: 4.94% (+/- 0.02%), total time: 1141.117513 s
+SVM CV, Kernel: rbf, C value: 1e-08, Accuracy: 4.94% (+/- 0.02%), total time: 1672.638813 s
+SVM CV, Kernel: rbf, C value: 0.1, Accuracy: 4.94% (+/- 0.02%), total time: 1674.746740 s
+SVM CV, Kernel: rbf, C value: 10, Accuracy: 36.32% (+/- 0.79%), total time: 1116.069011 s
+
+====================================================================================================
+
+Database: 54 species
+Length of each part: 1000
+Overlap = No
+K: 2,3,4,5
+PCA: 50
+MLP CV, Accuracy: 22.95% (+/- 16.05%), total time: 444.416843 s
+SVM CV, Kernel: linear, C value: 1e-08, Accuracy: 4.94% (+/- 0.00%), total time: 35425.948634 s
+SVM CV, Kernel: linear, C value: 0.1, Accuracy: 36.09% (+/- 0.31%), total time: 22734.909588 s
+SVM CV, Kernel: linear, C value: 10, Accuracy: 85.06% (+/- 0.52%), total time: 5438.916111 s
