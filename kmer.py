@@ -208,7 +208,7 @@ def CreateProfiles(gType,dbPath,kMax):
         steps = range(3,7)
         for s in steps:
             l = 5**s
-            for i in range(10):
+            for i in range(100):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
                 profilesTest.append(CreateProf(gType,gName,str(l),gSeq[winIndx:winIndx+l],kMax))
         
