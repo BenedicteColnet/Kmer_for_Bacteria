@@ -187,8 +187,8 @@ for k in kList:
         plt.savefig('Homogeneity Vector, devLen= ' + str(devLen) + ", k= " + str(k))
 """
 
-def CreateProf(gType,gName,gSeq,kMax):
-    prof = (gType,gName,)
+def CreateProf(gType,gName,l,gSeq,kMax):
+    prof = (gType,gName,l,)
     for k in range(1,kMax+1):
         signature = k_mer_naive_with_dict_initialization(gSeq,k)
         signature = dict_to_normalized_vector(signature)
@@ -210,13 +210,13 @@ def CreateProfiles(gType,dbPath,kMax):
             l = 5**s
             for i in range(10):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
-                profilesTest.append(CreateProf(gType,gName,gSeq[winIndx:winIndx+l],kMax))
+                profilesTest.append(CreateProf(gType,gName,l,gSeq[winIndx:winIndx+l],kMax))
         
         #Train dataset
         l = 10000
         i=0
         while((i+1)*l < gLen):
-            profilesTrain.append(CreateProf(gType,gName,gSeq[i*l:(i+1)*l],kMax))
+            profilesTrain.append(CreateProf(gType,gName,l,gSeq[i*l:(i+1)*l],kMax))
             i+=1
 
     np.save("test_profiles", profilesTest)
