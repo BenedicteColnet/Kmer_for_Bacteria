@@ -210,13 +210,13 @@ def CreateProfiles(gType,dbPath,kMax):
             l = 5**s
             for i in range(10):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
-                profilesTest.append(CreateProf(gType,gName,l,gSeq[winIndx:winIndx+l],kMax))
+                profilesTest.append(CreateProf(gType,gName,str(l),gSeq[winIndx:winIndx+l],kMax))
         
         #Train dataset
         l = 10000
         i=0
         while((i+1)*l < gLen):
-            profilesTrain.append(CreateProf(gType,gName,l,gSeq[i*l:(i+1)*l],kMax))
+            profilesTrain.append(CreateProf(gType,gName,str(l),gSeq[i*l:(i+1)*l],kMax))
             i+=1
 
     np.save("test_profiles", profilesTest)
