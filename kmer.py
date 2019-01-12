@@ -235,7 +235,10 @@ def CreateProfiles(gType,dbPath,kMax,l,overlapRatio = 0):
         i=0
         while(i+l < gLen):
             profiles.append(CreateProf(gType,gName,str(l),gSeq[i:i+l],kMax))
-            i = i + int(round(overlapRatio*l))
+            if overlapRatio != 0:
+                i += int(round(overlapRatio*l))
+            if overlapRatio == 0:
+                i += l
     np.save("/tmp/profiles_L"+str(l), profiles)
 
 
