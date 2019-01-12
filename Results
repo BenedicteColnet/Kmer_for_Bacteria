@@ -169,3 +169,12 @@ MLP CV, Accuracy: 22.95% (+/- 16.05%), total time: 444.416843 s
 SVM CV, Kernel: linear, C value: 1e-08, Accuracy: 4.94% (+/- 0.00%), total time: 35425.948634 s
 SVM CV, Kernel: linear, C value: 0.1, Accuracy: 36.09% (+/- 0.31%), total time: 22734.909588 s
 SVM CV, Kernel: linear, C value: 10, Accuracy: 85.06% (+/- 0.52%), total time: 5438.916111 s
+
+====================================================================================================
+
+Database: 54 species
+Length of each part: 30000
+Overlap = 10%
+K: 2,3,4,5
+PCA: 50
+SVM CV, Kernel: linear, C value: 10, Accuracy: 98.98% (+/- 0.46%), total time: 344.109136 s
