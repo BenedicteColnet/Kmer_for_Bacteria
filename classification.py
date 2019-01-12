@@ -151,17 +151,109 @@ def AnalyzeNLSVM(X,y,pcaNC=False):
                   % (scoresSVM.mean()*100, scoresSVM.std()*100 * 2, totalDurSVM))
 
 def PreProcessKmerDataTrain(name_of_npy, list_of_k):
-    #mapping=np.load("mapping.npy")
+    mapping=np.load("mapping.npy").item()
     tuples=PreProcessTuples(name_of_npy)
     df=Tuples2DF(tuples, list_of_k)
     df=df.sample(frac=1) #For suffle
     #df_numerized=df.replace({'Name': mapping})
     #Y=df_numerized["Name"]
     #X=df_numerized.drop(['Type', 'Name'], axis=1)
-    Y = pd.factorize(df["Name"])[0]
+    
+    
+    #Y = pd.factorize(df["Name"])[0]
+    Y=[]
+    for index, sample in df.iterrows():
+        Y.append(mapping[sample["Name"]])
+    Y=np.array(Y)
+    
+    
     X=df.drop(['Type', 'Name', 'Length'], axis=1)    
     return X, Y
 
+def SaveModel(folder,model,file):
+    fHandler = open(folder+'/'+file,'wb')
+    pickle.dump(model, fHandler)
+    fHandler.close()
+
+def LoadModel(fileName):
+    fHandler = open(fileName,'rb')
+    loaded_model = pickle.load(fHandler)
+    fHandler.close()
+    return loaded_model
+
+
+#CROSS VALIDATION
+def DoCrossValidation(profilePath):
+    X, y = PreProcessKmerDataTrain(profilePath, [2,3,4,5])
+    AnalyzeNNMLP(X.values,y,50)
+    AnalyzeNLSVM(X.values,y,50)
+
+def DoTwoComponentsAnalysis(profilePath):
+    X, y = PreProcessKmerDataTrain(profilePath, [2,3,4,5])
+    X_pca = ApplyPCA(X,2)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1],marker="o", c=y,s=25, edgecolor="k")
+    plt.savefig('2ComponentsPlots/L10000_k2345')
+
+def DoBestModelTraining(profilePath):
+    nPC = 50
+    cValue = 10
+    kern = "linear"
+    X, y = PreProcessKmerDataTrain(profilePath, [2,3,4,5])
+    X = ApplyPCA(X.values,nPC)
+    modelSVM = svm.SVC(gamma = 'auto', C=cValue, kernel=kern).fit(X,y)
+    return modelSVM
+
+
+def DoShiftAnalysis(profilePath,model):
+    nPC = 50
+    shiftAnalResults = []
+    for i in range(10):
+        Xtest, ytest = PreProcessKmerDataTrain(profilePath.replace('.npy','')+'_'+str(i)+'.npy', [2,3,4,5])
+        Xtest = ApplyPCA(Xtest.values,nPC)
+        shiftAnalResults.append(model.score(Xtest,ytest))
+    np.save('shiftAnalResults',shiftAnalResults)
+
+
+profileFile = "/tmp/profiles_L10000.npy"
+#DoCrossValidation(profileFile)
+#DoTwoComponentsAnalysis(profileFile)
+model = DoBestModelTraining(profileFile)
+SaveModel('Models',model,'model')
+#model = LoadModel('Models/model')
+DoShiftAnalysis(profileFile,model)
+
+#Overlap
+#=================================
+profileFile = "/tmp/profiles_L30000.npy"
+DoCrossValidation(profileFile)
+model = DoBestModelTraining(profileFile)
+SaveModel('Models',model,'model')
+#model = LoadModel('Models/model')
+profileFile = "/tmp/profiles_L10000.npy"
+DoShiftAnalysis(profileFile,model)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########################################################################################################################
+"""
+#PRACTICAL TEST
 def PreProcessKmerDataTest(name_of_npy, list_of_k):
     groups = dict()
     tuples=PreProcessTuples(name_of_npy)
@@ -179,45 +271,7 @@ def PreProcessKmerDataTest(name_of_npy, list_of_k):
         groups[spcs][l][0].append(sample.drop(['Type', 'Name', 'Length']).values)   
     return groups
 
-def SaveModel(folder,model,file):
-    fHandler = open(folder+'/'+file,'wb')
-    pickle.dump(model, fHandler)
-    fHandler.close()
-
-def LoadModel(fileName):
-    fHandler = open(fileName,'rb')
-    loaded_model = pickle.load(fHandler)
-    fHandler.close()
-    return loaded_model
-
-
-#CROSS VALIDATION
-"""
-X, y = PreProcessKmerDataTrain("Profiles/train_profiles_L10000.npy", [2,3,4,5])
-
-X_pca = ApplyPCA(X,2)
-plt.scatter(X_pca[:, 0], X_pca[:, 1],marker="o", c=y,s=25, edgecolor="k")
-plt.savefig('2ComponentsPlots/L10000_k2345')
-
-AnalyzeNNMLP(X.values,y,50)
-AnalyzeNLSVM(X.values,y,50)
-"""
-
-
-#PRACTICAL TEST
-nPC = 50
-"""
-cValue = 10
-kern = "linear"
-X, y = PreProcessKmerDataTrain("Profiles/train_profiles_L5000.npy", [2,3,4,5])
-X = ApplyPCA(X.values,nPC)
-modelSVM = svm.SVC(gamma = 'auto', C=cValue, kernel=kern).fit(X,y)
-SaveModel('Models',modelSVM,'model_profiles_L5000')
-"""
-modelSVM = LoadModel('Models/model_profiles_L5000')
-
 groups = PreProcessKmerDataTest("Profiles/test_profiles.npy", [2,3,4,5])
-
 results = []
 for spcs in groups.keys():
     print(spcs)
@@ -245,8 +299,6 @@ plt.legend()
 plt.savefig('plotResults')
 
 
-########################################################################################################################
-"""
 def neural_network_from_dataframe(X, y):
     model = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(10, 5)).fit(X,y)
     return model

@@ -195,6 +195,7 @@ def CreateProf(gType,gName,l,gSeq,kMax):
         prof += (signature,)
     return prof
 
+"""
 def CreateProfiles(gType,dbPath,kMax):
     profilesTest = []
     profilesTrain = []
@@ -204,6 +205,7 @@ def CreateProfiles(gType,dbPath,kMax):
         gLen = len(gSeq)
         np.random.seed(int(round(time.time())))
 
+        
         #Test dataset (random positions)!
         steps = range(3,7)
         for s in steps:
@@ -211,6 +213,7 @@ def CreateProfiles(gType,dbPath,kMax):
             for i in range(100):
                 winIndx = int(round(np.random.uniform(0,gLen-l)))    
                 profilesTest.append(CreateProf(gType,gName,str(l),gSeq[winIndx:winIndx+l],kMax))
+        
         
         #Train dataset
         l = 10000
@@ -220,6 +223,42 @@ def CreateProfiles(gType,dbPath,kMax):
             i+=1
 
     np.save("test_profiles", profilesTest)
-    np.save("train_profiles_L"+str(l), profilesTrain)
+    np.save("profiles_L"+str(l), profilesTrain)
+"""
 
-CreateProfiles("bact","..//Database",5)
+def CreateProfiles(gType,dbPath,kMax,l,overlapRatio = 0):
+    profiles = []
+    for filename in os.listdir(dbPath):
+        gName,gSeq = read_genome(dbPath+"/"+filename)
+        print("Processing ", gName)
+        gLen = len(gSeq)
+        i=0
+        while(i+l < gLen):
+            profiles.append(CreateProf(gType,gName,str(l),gSeq[i:i+l],kMax))
+            i = i + int(round(overlapRatio*l))
+    np.save("/tmp/profiles_L"+str(l), profiles)
+
+
+def CreateProfilesShiftAnalysis(gType,dbPath,kMax,l,shInd,nShiftPoints):
+    profiles = []
+    for filename in os.listdir(dbPath):
+        gName,gSeq = read_genome(dbPath+"/"+filename)
+        print("Processing ", gName)
+        gLen = len(gSeq)
+        shift = int(round(shInd*(l/nShiftPoints)))
+        i=0
+        while((i+1)*l+shift < gLen):
+            profiles.append(CreateProf(gType,gName,str(l),gSeq[i*l+shift:(i+1)*l+shift],kMax))
+            i+=1
+    np.save("/tmp/profiles_L"+str(l)+'_'+str(shInd), profiles)
+
+#CreateProfiles("bact","..//Database",5,5000,0)
+#CreateProfiles("bact","..//Database",5,10000,0)
+
+#CreateProfiles("bact","..//Database",5,5000,0.1)
+CreateProfiles("bact","..//Database",5,30000,0.1)
+
+nShiftPoints = 10
+for shInd in range(nShiftPoints):
+    CreateProfilesShiftAnalysis("bact","..//Database",5,10000,shInd,nShiftPoints)
+    CreateProfilesShiftAnalysis("bact","..//Database",5,5000,shInd,nShiftPoints)
