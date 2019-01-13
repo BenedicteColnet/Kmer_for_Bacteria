@@ -195,36 +195,18 @@ def CreateProf(gType,gName,l,gSeq,kMax):
         prof += (signature,)
     return prof
 
-"""
-def CreateProfiles(gType,dbPath,kMax):
-    profilesTest = []
-    profilesTrain = []
+
+def CreateProfilesRandom(gType,dbPath,kMax,l):
+    profiles = []
     for filename in os.listdir(dbPath):
         gName,gSeq = read_genome(dbPath+"/"+filename)
         print("Processing ", gName)
         gLen = len(gSeq)
         np.random.seed(int(round(time.time())))
-
-        
-        #Test dataset (random positions)!
-        steps = range(3,7)
-        for s in steps:
-            l = 5**s
-            for i in range(100):
-                winIndx = int(round(np.random.uniform(0,gLen-l)))    
-                profilesTest.append(CreateProf(gType,gName,str(l),gSeq[winIndx:winIndx+l],kMax))
-        
-        
-        #Train dataset
-        l = 10000
-        i=0
-        while((i+1)*l < gLen):
-            profilesTrain.append(CreateProf(gType,gName,str(l),gSeq[i*l:(i+1)*l],kMax))
-            i+=1
-
-    np.save("test_profiles", profilesTest)
-    np.save("profiles_L"+str(l), profilesTrain)
-"""
+        for i in range(200):
+            winIndx = int(round(np.random.uniform(0,gLen-l)))
+            profiles.append(CreateProf(gType,gName,str(l),gSeq[winIndx:winIndx+l],kMax))
+    np.save("/tmp/random_profiles_L"+str(l), profiles)
 
 def CreateProfiles(gType,dbPath,kMax,l,overlapRatio = 0):
     profiles = []
@@ -255,13 +237,21 @@ def CreateProfilesShiftAnalysis(gType,dbPath,kMax,l,shInd,nShiftPoints):
             i+=1
     np.save("/tmp/profiles_L"+str(l)+'_'+str(shInd), profiles)
 
+
+
+CreateProfilesRandom("bact","..//Database",5,5000)
+CreateProfilesRandom("bact","..//Database",5,10000)
+CreateProfilesRandom("bact","..//Database",5,30000)
+
 #CreateProfiles("bact","..//Database",5,5000,0)
 #CreateProfiles("bact","..//Database",5,10000,0)
-
 #CreateProfiles("bact","..//Database",5,5000,0.1)
-CreateProfiles("bact","..//Database",5,30000,0.1)
+#CreateProfiles("bact","..//Database",5,30000,0.1)
 
-nShiftPoints = 10
+"""
+nShiftPoints = 20
 for shInd in range(nShiftPoints):
+    CreateProfilesShiftAnalysis("bact","..//Database",5,30000,shInd,nShiftPoints)
     CreateProfilesShiftAnalysis("bact","..//Database",5,10000,shInd,nShiftPoints)
     CreateProfilesShiftAnalysis("bact","..//Database",5,5000,shInd,nShiftPoints)
+"""

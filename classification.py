@@ -203,11 +203,17 @@ def DoBestModelTraining(profilePath):
     modelSVM = svm.SVC(gamma = 'auto', C=cValue, kernel=kern).fit(X,y)
     return modelSVM
 
+def DoSimpleEvaluation(profilePath,model):
+    nPC = 50
+    Xtest, ytest = PreProcessKmerDataTrain(profilePath, [2,3,4,5])
+    Xtest = ApplyPCA(Xtest.values,nPC)
+    score = model.score(Xtest,ytest)
+    print(score)
 
 def DoShiftAnalysis(profilePath,model):
     nPC = 50
     shiftAnalResults = []
-    for i in range(10):
+    for i in range(20):
         Xtest, ytest = PreProcessKmerDataTrain(profilePath.replace('.npy','')+'_'+str(i)+'.npy', [2,3,4,5])
         Xtest = ApplyPCA(Xtest.values,nPC)
         shiftAnalResults.append(model.score(Xtest,ytest))
